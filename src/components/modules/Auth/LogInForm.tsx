@@ -25,13 +25,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useRouter } from "next/navigation";
-import { authLogIn } from "@/actions/auth.action";
-// import checkAuthStatus from "@/utility/auth";
-// import { UseUser } from "@/Providers/UserProvider";
+import { authLogIn } from "@/actions/auth/login.action";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+  email: z.email({ message: "Invalid email address" }),
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
@@ -43,8 +40,6 @@ export default function LogInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  //   const { setUser } = UseUser();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -63,13 +58,10 @@ export default function LogInForm() {
     };
 
     try {
-      const res = await authLogIn(logInData); //{success: true, message: 'User loggedin successfully!', data: {needPasswordChange: false}}
+      const res = await authLogIn(logInData);
       console.log(res);
     } catch (err: any) {
-      setError(
-        err.message ||
-          "Login failed. Please check your credentials and try again."
-      );
+      setError(err.message || "Login failed. Wrong Credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -110,6 +102,7 @@ export default function LogInForm() {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
+                        autoComplete="email"
                         type="email"
                         placeholder="m@example.com"
                         {...field}
@@ -129,6 +122,8 @@ export default function LogInForm() {
                     <FormControl>
                       <div className="relative">
                         <Input
+                          autoComplete="current-password"
+                          placeholder="password"
                           type={showPassword ? "text" : "password"}
                           className="pr-10"
                           {...field}
@@ -167,8 +162,8 @@ export default function LogInForm() {
                 </Link>
               </div>
               <button className="text-center text-sm text-muted-foreground">
-                <Link href="/" className="underline">
-                  back to home
+                <Link href="/forget-password" className="underline">
+                  forget-password
                 </Link>
               </button>
             </CardFooter>

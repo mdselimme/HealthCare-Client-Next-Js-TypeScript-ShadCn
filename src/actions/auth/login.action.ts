@@ -4,6 +4,7 @@ export const authLogIn = async (loginData: {
   email: string;
   password: string;
 }) => {
+  console.log(process.env.NEXT_PUBLIC_API_URL)
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
     method: "POST",
     headers: {
@@ -12,6 +13,7 @@ export const authLogIn = async (loginData: {
     body: JSON.stringify(loginData),
     credentials: "include",
   });
+  console.log(res)
   if (!res.ok) {
     throw new Error("Failed to log in");
   }
@@ -27,27 +29,6 @@ export const authLogOut = async () => {
   });
   if (!res.ok) {
     throw new Error("Failed to log out");
-  }
-  const data = await res.json();
-  return data;
-};
-
-// AUTH REGISTER ACTION
-export const authRegister = async (registerData: {
-  name: string;
-  email: string;
-  password: string;
-}) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(registerData),
-    credentials: "include",
-  });
-  if (!res.ok) {
-    throw new Error("Failed to register");
   }
   const data = await res.json();
   return data;

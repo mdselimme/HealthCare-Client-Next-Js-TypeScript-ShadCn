@@ -4,7 +4,6 @@ export const authLogIn = async (loginData: {
   email: string;
   password: string;
 }) => {
-  console.log(process.env.NEXT_PUBLIC_API_URL)
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
     method: "POST",
     headers: {

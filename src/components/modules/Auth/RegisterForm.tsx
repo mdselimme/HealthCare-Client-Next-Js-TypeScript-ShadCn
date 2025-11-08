@@ -25,6 +25,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { registerPatient } from "@/actions/auth/registerPatient";
 
 const loginSchema = z
   .object({
@@ -62,10 +63,10 @@ export default function RegisterForm() {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await authLogIn(logInData);
+      const res = await registerPatient(data);
       console.log(res);
     } catch (err: any) {
-      setError(err.message || "Login failed. Wrong Credentials.");
+      setError(err.message || "Register failed. Request failed.");
     } finally {
       setIsLoading(false);
     }

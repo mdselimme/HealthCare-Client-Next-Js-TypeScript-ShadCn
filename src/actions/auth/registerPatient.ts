@@ -22,6 +22,7 @@ export const registerPatient = async (patient: IRegister) => {
         body: patientFormData,
     });
 
+
     if (!res.ok) {
         throw new Error("Failed to Register Account");
     }

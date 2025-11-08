@@ -1,3 +1,5 @@
 "use server"
 
-export const registerPatient = async () => { }
+export const registerPatient = async () => {
+
+}

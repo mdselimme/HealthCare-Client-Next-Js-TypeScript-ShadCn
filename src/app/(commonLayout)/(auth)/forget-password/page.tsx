@@ -1,4 +1,4 @@
-const page = () => {
+const ForgetPasswordPage = () => {
   return (
     <div>
       <h1>Forget Password Page</h1>
@@ -6,4 +6,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default ForgetPasswordPage;

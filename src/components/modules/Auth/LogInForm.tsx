@@ -36,7 +36,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-export default function LogInForm() {
+export default function LogInForm({ redirect }: { redirect?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +55,7 @@ export default function LogInForm() {
     const logInData = {
       email: data.email,
       password: data.password,
+      redirect: redirect as string,
     };
 
     try {

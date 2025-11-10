@@ -2,13 +2,15 @@ import Link from "next/link";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../ui/sheet";
 import { Menu } from "lucide-react";
+import { getCookie } from "@/lib/tokenHandlers";
+import LogOutButton from "../modules/Auth/LogOutButton";
 
 interface INavLink {
   name: string;
   url: string;
 }
 
-const PublicNavbar = () => {
+const PublicNavbar = async () => {
   const navItems: INavLink[] = [
     { name: "Home", url: "/" },
     { name: "Consultation", url: "/consultation" },
@@ -16,6 +18,10 @@ const PublicNavbar = () => {
     { name: "Diagnostics", url: "/diagnostics" },
     { name: "NGOs", url: "/ngos" },
   ];
+
+  const accessToken = await getCookie("accessToken");
+
+  const isLoggedIn = accessToken ? true : false;
 
   return (
     <section className="sticky top-0 z-50 bg-background/95 shadow border-b">
@@ -40,9 +46,13 @@ const PublicNavbar = () => {
           </ul>
         </nav>
         <div className="hidden md:block">
-          <Link href={"/login"}>
-            <Button>Log In</Button>
-          </Link>
+          {isLoggedIn ? (
+            <LogOutButton />
+          ) : (
+            <Link href={"/login"}>
+              <Button>Log In</Button>
+            </Link>
+          )}
         </div>
         {/* Mobile Menu  */}
         <div className="md:hidden">
@@ -67,9 +77,13 @@ const PublicNavbar = () => {
                 ))}
                 <div className="border-t pt-4 flex flex-col space-y-4">
                   <div className="flex justify-center"></div>
-                  <Link href="/login" className="text-lg font-medium">
-                    <Button>Login</Button>
-                  </Link>
+                  {isLoggedIn ? (
+                    <LogOutButton />
+                  ) : (
+                    <Link href={"/login"}>
+                      <Button className="w-full">Log In</Button>
+                    </Link>
+                  )}
                 </div>
               </nav>
             </SheetContent>

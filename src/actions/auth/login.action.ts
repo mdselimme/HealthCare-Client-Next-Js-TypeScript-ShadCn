@@ -3,13 +3,17 @@
 import { ILogIn } from "@/types/auth.types";
 import { parse } from "cookie";
 import { JwtPayload } from "jsonwebtoken";
-import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
-import { getDefaultDashboardRoute, isValidRedirectForRole, IUserRole } from "@/lib/auth.utils";
+import {
+  getDefaultDashboardRoute,
+  isValidRedirectForRole,
+  IUserRole,
+} from "@/lib/auth.utils";
 import { redirect } from "next/navigation";
+import { setCookie } from "@/lib/tokenHandlers";
 
 // AUTH LOGIN ACTION
-export const authLogIn = async (loginData: ILogIn & { redirect: string }) => {
+export const authLogIn = async (loginData: ILogIn & { redirect?: string }) => {
   try {
     let accessTokenObject: null | any = null;
     let refreshTokenObject: null | any = null;
@@ -23,19 +27,24 @@ export const authLogIn = async (loginData: ILogIn & { redirect: string }) => {
       body: JSON.stringify(loginData),
       credentials: "include",
     });
+
+    if (!res.ok) {
+      throw new Error("Failed to log in");
+    }
+
     const setCookieHeaders = res.headers.getSetCookie();
 
     if (setCookieHeaders && setCookieHeaders.length > 0) {
       setCookieHeaders.forEach((cookie: string) => {
         const parsedCookie = parse(cookie);
 
-        if (parsedCookie['accessToken']) {
+        if (parsedCookie["accessToken"]) {
           accessTokenObject = parsedCookie;
         }
-        if (parsedCookie['refreshToken']) {
+        if (parsedCookie["refreshToken"]) {
           refreshTokenObject = parsedCookie;
         }
-      })
+      });
     } else {
       throw new Error("No Set-Cookie header found");
     }
@@ -48,35 +57,33 @@ export const authLogIn = async (loginData: ILogIn & { redirect: string }) => {
       throw new Error("Tokens not found in cookies");
     }
 
-    const cookieStore = await cookies();
-
-    cookieStore.set("accessToken", accessTokenObject.accessToken, {
+    await setCookie("accessToken", accessTokenObject.accessToken, {
       secure: true,
       httpOnly: true,
-      maxAge: parseInt(accessTokenObject['Max-Age']) || 1000 * 60 * 60,
+      maxAge: parseInt(accessTokenObject["Max-Age"]) || 1000 * 60 * 60,
       path: accessTokenObject.Path || "/",
-      sameSite: accessTokenObject['SameSite'] || "none",
+      sameSite: accessTokenObject["SameSite"] || "none",
     });
 
-    cookieStore.set("refreshToken", refreshTokenObject.refreshToken, {
+    await setCookie("refreshToken", refreshTokenObject.refreshToken, {
       secure: true,
       httpOnly: true,
-      maxAge: parseInt(refreshTokenObject['Max-Age']) || 1000 * 60 * 60 * 24 * 90,
+      maxAge:
+        parseInt(refreshTokenObject["Max-Age"]) || 1000 * 60 * 60 * 24 * 90,
       path: refreshTokenObject.Path || "/",
-      sameSite: refreshTokenObject['SameSite'] || "none",
+      sameSite: refreshTokenObject["SameSite"] || "none",
     });
-    if (!res.ok) {
-      throw new Error("Failed to log in");
-    }
-    const verifiedToken: JwtPayload | string = jwt.verify(accessTokenObject.accessToken, process.env.JWT_SECRET as string);
+
+    const verifiedToken: JwtPayload | string = jwt.verify(
+      accessTokenObject.accessToken,
+      process.env.JWT_ACCESS_TOKEN_SECRET as string
+    );
 
     if (typeof verifiedToken === "string") {
       throw new Error("Invalid token");
-
     }
 
     const userRole: IUserRole = verifiedToken.role;
-
 
     if (redirectTo) {
       const requestedPath = redirectTo.toString();
@@ -85,28 +92,14 @@ export const authLogIn = async (loginData: ILogIn & { redirect: string }) => {
       } else {
         redirect(getDefaultDashboardRoute(userRole));
       }
+    } else {
+      redirect(getDefaultDashboardRoute(userRole));
     }
-    const data = await res.json();
-
-    return data;
   } catch (error: any) {
-    if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
       throw error;
     }
     console.log(error);
     return { error: "Login failed" };
   }
-};
-
-// AUTH LOGOUT ACTION
-export const authLogOut = async () => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
-    method: "POST",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    throw new Error("Failed to log out");
-  }
-  const data = await res.json();
-  return data;
 };

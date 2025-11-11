@@ -27,10 +27,7 @@ export const authLogIn = async (loginData: ILogIn & { redirect?: string }) => {
       body: JSON.stringify(loginData),
       credentials: "include",
     });
-
-    if (!res.ok) {
-      throw new Error("Failed to log in");
-    }
+    console.log(res);
 
     const setCookieHeaders = res.headers.getSetCookie();
 
@@ -99,7 +96,7 @@ export const authLogIn = async (loginData: ILogIn & { redirect?: string }) => {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) {
       throw error;
     }
-    console.log(error);
-    return { error: "Login failed" };
+
+    throw new Error("User Logged In Failed. Wrong credential.");
   }
 };

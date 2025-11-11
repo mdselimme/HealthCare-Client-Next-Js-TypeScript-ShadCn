@@ -26,11 +26,7 @@ export const registerPatient = async (patient: IRegister) => {
         body: patientFormData,
       }
     );
-    console.log(res);
 
-    if (!res.ok) {
-      throw new Error("Failed to Register Account");
-    }
     const data = await res.json();
 
     if (data.success) {
@@ -42,6 +38,6 @@ export const registerPatient = async (patient: IRegister) => {
     if (error?.digest?.startsWith("NEXT_REDIRECT")) {
       throw error;
     }
-    return { error: "Login failed" };
+    throw error;
   }
 };
